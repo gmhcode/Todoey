@@ -12,10 +12,17 @@ class ToDoListViewController: UITableViewController  {
 
     var itemArray = ["Find Mike","Buy eggos","Destroy Demogorgon"]
     
+    let defaults = UserDefaults.standard
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if let items = defaults.array(forKey: "ToDoListArray") as? [String]{
+            itemArray = items
+            //this makes itemArray take directly from saved data in the computer rather than from the app itself, so the info cant get deleted when assassinated
+        }
         
         // Do any additional setup after loading the view, typically from a nib.
     }
@@ -66,6 +73,11 @@ class ToDoListViewController: UITableViewController  {
             
             self.itemArray.append(textField.text!)
             //appending the alert text to the itemArray
+            
+            self.defaults.set(self.itemArray, forKey: "toDoListArray")
+            //this saves whatever is entered into add item
+            //gets saved in a plist file
+            
             self.tableView.reloadData()
             //need to reload the tableView so our new item will appear in the table
         }
@@ -73,6 +85,7 @@ class ToDoListViewController: UITableViewController  {
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create new item"
             print(alertTextField.text)
+            
             textField = alertTextField
             
             //this adds a text field to the alert
