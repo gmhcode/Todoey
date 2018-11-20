@@ -10,7 +10,7 @@ import UIKit
 
 class ToDoListViewController: UITableViewController  {
 
-    let itemArray = ["Find Mike","Buy eggos","Destroy Demogorgon"]
+    var itemArray = ["Find Mike","Buy eggos","Destroy Demogorgon"]
     
     
     override func viewDidLoad() {
@@ -30,6 +30,9 @@ class ToDoListViewController: UITableViewController  {
         return cell
     }
     
+    
+    
+    
     //MARK - TableView Delegate Methods
     //does things when we select a row vv
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -47,7 +50,40 @@ class ToDoListViewController: UITableViewController  {
         //unhighlights the row we select it after we selected it
         
     }
+    // MARK - Add New Items
     
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        
+        var textField = UITextField()
+        //creating this so we can use it in ther alerttextfield area AND in the button pressed area
+        
+        let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
+        // creates an alert when you tap the + button
+        
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+            //what will happen once the user clicks the Add Item button on our UIAlert
+            print("success")
+            
+            self.itemArray.append(textField.text!)
+            //appending the alert text to the itemArray
+            self.tableView.reloadData()
+            //need to reload the tableView so our new item will appear in the table
+        }
+        
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new item"
+            print(alertTextField.text)
+            textField = alertTextField
+            
+            //this adds a text field to the alert
+        }
+        
+        alert.addAction(action)
+        //adds the action we made to the alert we made
+        
+        present(alert, animated: true, completion: nil)
+        //makes the alert pop on on the screen
+    }
     
 }
 
