@@ -12,13 +12,17 @@ class ToDoListViewController: UITableViewController  {
 
     var itemArray = [Item]()
     
-    let defaults = UserDefaults.standard
-    
+//    let defaults = UserDefaults.standard
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+//        let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+//        //this searches our files for the data of the app.
+        
+        print(dataFilePath)
         let newItem = Item()
         newItem.title = "Find Mike"
         
@@ -30,11 +34,14 @@ class ToDoListViewController: UITableViewController  {
         
         let newItem3 = Item()
         newItem3.title = "Destroy Demogorgon"
+        itemArray.append(newItem3)
         
-        if let items = defaults.array(forKey: "ToDoListArray") as? [Item]{
-            itemArray = items
-            //this makes itemArray take directly from saved data in the computer rather than from the app itself, so the info cant get deleted when assassinated
-        }
+        loadItems()
+        
+//        if let items = defaults.array(forKey: "ToDoListArray") as? [Item]{
+//            itemArray = items
+//            //this makes itemArray take directly from saved data in the computer rather than from the app itself, so the info cant get deleted when assassinated
+//        }
         
         // Do any additional setup after loading the view, typically from a nib.
     }
@@ -78,17 +85,19 @@ class ToDoListViewController: UITableViewController  {
 //        print(itemArray[indexPath.row])
         
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
-        //^^ this does the same as vv this, it basically turns "done" on and off, which in turn, turns the checkmark on and off
-        //this says if you select a row that you didnt select before, then done will equal true, if not then done will == false
-        if itemArray[indexPath.row].done == false {
-            itemArray[indexPath.row].done = true
-            
-        }else {
-            itemArray[indexPath.row].done = false
-            
-        }
         
-        tableView.reloadData()
+        saveItems()
+////        ^^ this does the same as vv this, it basically turns "done" on and off, which in turn, turns the checkmark on and off
+////        this says if you select a row that you didnt select before, then done will equal true, if not then done will == false
+//        if itemArray[indexPath.row].done == false {
+//            itemArray[indexPath.row].done = true
+//
+//        }else {
+//            itemArray[indexPath.row].done = false
+//
+//        }
+//
+        
         
         
         
@@ -115,10 +124,10 @@ class ToDoListViewController: UITableViewController  {
                 //setting the title property of Item class to what the user typed in
             self.itemArray.append(newItem)
             //appending the alert text to the itemArray
+            self.saveItems()
             
-            self.defaults.set(self.itemArray, forKey: "toDoListArray")
-            //this saves whatever is entered into add item
-            //gets saved in a plist file
+            
+
             
             self.tableView.reloadData()
             //need to reload the tableView so our new item will appear in the table
@@ -140,6 +149,38 @@ class ToDoListViewController: UITableViewController  {
         //makes the alert pop on on the screen
     }
     
+    func saveItems(){
+        //saves encoded todo list on the computer
+        let encoder = PropertyListEncoder()
+        
+        do{
+            let data = try encoder.encode(itemArray)
+            //since encoder.encode can throw and error, you need a do catch block
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("\(error)")
+        }
+        self.tableView.reloadData()
+        //this do catch is telling the app to save all this data in a file on the computer, and its encoded
+        //            self.defaults.set(self.itemArray, forKey: "toDoListArray")
+        //            //this saves whatever is entered into add item
+        //            //gets saved in a plist file
+    }
+
+    func loadItems() {
+        //this function decodes the data that we stored in the plist on our computer
+        if let data = try? Data(contentsOf: dataFilePath!){
+            let decoder = PropertyListDecoder()
+            //we need this to decode all new entries in our plist on the computer
+            do{
+            itemArray = try decoder.decode([Item].self, from: data)
+            }
+            catch{
+                print("\(error)")
+                
+            }
+        }
+    }
 }
 
 
