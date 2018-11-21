@@ -10,7 +10,7 @@ import UIKit
 
 class ToDoListViewController: UITableViewController  {
 
-    var itemArray = ["Find Mike","Buy eggos","Destroy Demogorgon"]
+    var itemArray = [Item]()
     
     let defaults = UserDefaults.standard
     
@@ -19,7 +19,19 @@ class ToDoListViewController: UITableViewController  {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let items = defaults.array(forKey: "ToDoListArray") as? [String]{
+        let newItem = Item()
+        newItem.title = "Find Mike"
+        
+        itemArray.append(newItem)
+        
+        let newItem2 = Item()
+        newItem2.title = "Buy Eggos"
+        itemArray.append(newItem2)
+        
+        let newItem3 = Item()
+        newItem3.title = "Destroy Demogorgon"
+        
+        if let items = defaults.array(forKey: "ToDoListArray") as? [Item]{
             itemArray = items
             //this makes itemArray take directly from saved data in the computer rather than from the app itself, so the info cant get deleted when assassinated
         }
@@ -33,7 +45,27 @@ class ToDoListViewController: UITableViewController  {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-        cell.textLabel?.text = itemArray[indexPath.row]
+        
+        let item = itemArray[indexPath.row]
+        
+        cell.textLabel?.text = item.title
+        // need to access the .title because item array is now the Item class
+        
+        //Ternary operatpr ==>
+        //value = condition ? valueIfTrue : valueIfFalse
+        
+        
+        cell.accessoryType = item.done == true ? .checkmark : .none
+            //this says"set the cells accessoryType depending on whether item.done it true, if it is true, set it to .checkmark, if its not true then set it to done
+        
+        //^^ that does the same thing as vv that
+//        if item.done == true{
+//            cell.accessoryType = .checkmark
+//        } else{
+//            cell.accessoryType = .none
+//        }
+//        //^^ this says "when you select a row that already had a checkmark, then set the checkmark = none.. if the row didnt have a checkmark, then give it a checkmark
+        
         return cell
     }
     
@@ -45,13 +77,20 @@ class ToDoListViewController: UITableViewController  {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 //        print(itemArray[indexPath.row])
         
-        if  tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark  {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        //^^ this does the same as vv this, it basically turns "done" on and off, which in turn, turns the checkmark on and off
+        //this says if you select a row that you didnt select before, then done will equal true, if not then done will == false
+        if itemArray[indexPath.row].done == false {
+            itemArray[indexPath.row].done = true
+            
+        }else {
+            itemArray[indexPath.row].done = false
+            
         }
-        else{
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
-        //^^ this says "when you select a row that already had a checkmark, then set the checkmark = none.. if the row didnt have a checkmark, then give it a checkmark
+        
+        tableView.reloadData()
+        
+        
         
         tableView.deselectRow(at: indexPath, animated: true)
         //unhighlights the row we select it after we selected it
@@ -71,7 +110,10 @@ class ToDoListViewController: UITableViewController  {
             //what will happen once the user clicks the Add Item button on our UIAlert
             print("success")
             
-            self.itemArray.append(textField.text!)
+            let newItem = Item()
+            newItem.title = textField.text!
+                //setting the title property of Item class to what the user typed in
+            self.itemArray.append(newItem)
             //appending the alert text to the itemArray
             
             self.defaults.set(self.itemArray, forKey: "toDoListArray")
